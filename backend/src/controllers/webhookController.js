@@ -1,10 +1,11 @@
 const Automation = require("../models/Automation");
 const ExecutionLog = require("../models/ExecutionLog");
-const sendDiscordMessage = require("../services/discordService");
+const actions = require("../actions");
 
 const triggerWebhook = async (req, res) => {
   try {
     const { id } = req.params;
+    const payload = req.body;
 
     const automation = await Automation.findOne({
       webhookId: id,
@@ -17,49 +18,45 @@ const triggerWebhook = async (req, res) => {
       });
     }
 
-    const payload = req.body;
-
     try {
-      // Discord Action
-      if (automation.action.type === "discord") {
-        const discordWebhookUrl =
-          automation.action.config.webhookUrl;
+      for (const action of automation.actions) {
+        // console.log("Executing action:", action.type);
+        const actionHandler = actions[action.type];
 
-        const message = `
-🚀 Automation Triggered
+        if (!actionHandler) {
+          throw new Error(`Unsupported action: ${action.type}`);
+        }
 
-Automation: ${automation.name}
-
-Payload:
-${JSON.stringify(payload, null, 2)}
-        `;
-
-        await sendDiscordMessage(discordWebhookUrl, message);
+        await actionHandler(
+          {
+            ...automation.toObject(),
+            action,
+          },
+          payload,
+        );
       }
 
-      // Success log save
       await ExecutionLog.create({
         automationId: automation._id,
         payload,
         status: "success",
       });
 
-      return res.status(200).json({
+      return res.json({
         success: true,
         message: "Webhook executed successfully",
       });
-    } catch (actionError) {
-      // Failed log save
+    } catch (err) {
       await ExecutionLog.create({
         automationId: automation._id,
         payload,
         status: "failed",
-        error: actionError.message,
+        error: err.message,
       });
 
       return res.status(500).json({
         success: false,
-        message: actionError.message,
+        message: err.message,
       });
     }
   } catch (error) {
@@ -69,6 +66,4 @@ ${JSON.stringify(payload, null, 2)}
   }
 };
 
-module.exports = {
-  triggerWebhook,
-};
+module.exports = { triggerWebhook };

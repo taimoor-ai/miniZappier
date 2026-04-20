@@ -26,18 +26,20 @@ const automationSchema = new mongoose.Schema(
       },
     },
 
-    action: {
-      type: {
-        type: String,
-        required: true,
-        enum: ["discord", "email", "mongodb"],
-      },
-
-      config: {
-        type: Object,
-        default: {},
-      },
+    actions: [
+  {
+    type: {
+      type: String,
+      required: true,
+      enum: ["discord", "email", "mongodb"],
     },
+
+    config: {
+      type: Object,
+      default: {},
+    },
+  },
+],
 
     webhookId: {
       type: String,

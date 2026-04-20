@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const createAutomation = async (req, res) => {
   try {
-    const { name, trigger, action } = req.body;
+    const { name, trigger, actions } = req.body;
 
     if (!req.body) {
       return res.status(400).json({
@@ -22,7 +22,7 @@ const createAutomation = async (req, res) => {
       userId: req.user.id,
       name,
       trigger,
-      action,
+      actions,
       webhookId,
     });
 
