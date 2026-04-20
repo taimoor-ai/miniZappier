@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 const app = require('./app');
 const connectDB = require('./config/db');
-
+require("./workers/automationWorker");
 // Load env variables
 
 // Connect to database

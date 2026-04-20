@@ -1,10 +1,15 @@
 const express = require('express');
 const app = express();
+const cors=require("cors")
 const authRoutes = require("./routes/authRoutes");
 const automationRoutes = require("./routes/automationRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
 const logRoutes = require("./routes/logRoutes");
-
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
+}));
 
 
 

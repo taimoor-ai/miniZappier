@@ -40,7 +40,25 @@ const automationSchema = new mongoose.Schema(
     },
   },
 ],
+    conditions: [
+  {
+    field: {
+      type: String,
+      required: true,
+    },
 
+    operator: {
+      type: String,
+      required: true,
+      enum: [">", "<", ">=", "<=", "==", "!=", "includes"],
+    },
+
+    value: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+    },
+  },
+],
     webhookId: {
       type: String,
       unique: true,
