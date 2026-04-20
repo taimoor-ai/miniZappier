@@ -1,0 +1,56 @@
+const mongoose = require("mongoose");
+
+const automationSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    name: {
+      type: String,
+      required: true,
+    },
+
+    trigger: {
+      type: {
+        type: String,
+        required: true,
+        enum: ["webhook", "github", "stripe"],
+      },
+
+      config: {
+        type: Object,
+        default: {},
+      },
+    },
+
+    action: {
+      type: {
+        type: String,
+        required: true,
+        enum: ["discord", "email", "mongodb"],
+      },
+
+      config: {
+        type: Object,
+        default: {},
+      },
+    },
+
+    webhookId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Automation", automationSchema);

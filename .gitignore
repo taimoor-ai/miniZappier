@@ -1,0 +1,95 @@
+# =========================
+# Root .gitignore
+# For MERN project with:
+# /backend
+# /frontend
+# =========================
+
+# Node modules
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables
+backend/src/.env
+frontend/src/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime files
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+
+# Build folders
+frontend/dist/
+frontend/build/
+backend/dist/
+
+# Vite cache
+frontend/.vite/
+
+# Parcel cache
+.cache/
+.parcel-cache/
+
+# Next.js
+.next/
+
+# Temporary files
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor folders
+.vscode/
+.idea/
+
+# Optional VS Code settings
+!.vscode/extensions.json
+
+# Mac system files
+.AppleDouble
+.LSOverride
+
+# Linux trash
+.Trash-*
+
+# Windows files
+Desktop.ini
+
+# npm package lock if you do NOT want it tracked
+# Uncomment if needed:
+# package-lock.json
+
+# Testing
+coverage/
+.nyc_output/
+
+# MongoDB local database files (if any)
+*.mongodb
+data/db/
+
+# Uploads / generated files
+backend/uploads/
+frontend/uploads/
+
+# Local tunnel tools
+.ngrok2/
+.cloudflare/
+
+# dotenv backups
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
