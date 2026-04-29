@@ -2,15 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Font */
+/* @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;700&display=swap'); */
+
 :root {
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: 'Nunito', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
- 
-  font-family: 'Inter', sans-serif
   @apply bg-slate-50 text-slate-900 antialiased;
+  font-family: 'Nunito', sans-serif;
 }
 
 #root {
@@ -18,5 +19,5 @@ body {
 }
 
 .glass {
-  @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-soft;
+  @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg;
 }
