@@ -1,9 +1,14 @@
 import { ArrowRight, Check, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
-
+import AuthModal from "./AuthModel";
 export default function CTA() {
   const [isVisible, setIsVisible] = useState(false);
-
+const [authMode, setAuthMode] = useState(null); // 'login' | 'register' | null
+    const [isOpen, setIsOpen] = useState(false);
+const openRegister = () => {
+    setIsOpen(false);
+    setAuthMode("register");
+  };
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -83,7 +88,9 @@ export default function CTA() {
         <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 transition-all duration-1000 delay-200 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
-          <button className="w-full sm:w-auto group bg-white text-black px-6 sm:px-10 py-3 sm:py-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-100 hover:shadow-xl shadow-white/20 transform hover:scale-105 active:scale-95">
+          <button 
+           onClick={openRegister}
+          className="w-full sm:w-auto group bg-white text-black px-6 sm:px-10 py-3 sm:py-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-100 hover:shadow-xl shadow-white/20 transform hover:scale-105 active:scale-95">
             Get Started Free
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
           </button>
@@ -122,6 +129,12 @@ export default function CTA() {
           animation: float 6s ease-in-out infinite;
         }
       `}</style>
+       {/* Auth Modal — blur backdrop + Login/Register switching */}
+      <AuthModal
+        mode={authMode}
+        onClose={() => setAuthMode(null)}
+        onSwitch={(newMode) => setAuthMode(newMode)}
+      />
     </section>
   );
 }

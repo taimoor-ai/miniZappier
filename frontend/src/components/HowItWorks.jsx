@@ -1,9 +1,15 @@
 import { Check, Link2, Zap, Target, Workflow, BarChart3, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import AuthModal from "./AuthModel";
 
 export default function HowItWorks() {
   const [isVisible, setIsVisible] = useState(false);
-
+  const [authMode, setAuthMode] = useState(null); // 'login' | 'register' | null
+    const [isOpen, setIsOpen] = useState(false);
+const openRegister = () => {
+    setIsOpen(false);
+    setAuthMode("register");
+  };
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -139,7 +145,9 @@ export default function HowItWorks() {
         <div className={`mt-12 sm:mt-16 md:mt-20 text-center transition-all duration-1000 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
-          <button className="inline-flex items-center gap-2 bg-white text-black px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold transition-all duration-300 hover:bg-gray-100 hover:shadow-lg transform hover:scale-105 active:scale-95">
+          <button 
+           onClick={openRegister}
+          className="inline-flex items-center gap-2 bg-white text-black px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold transition-all duration-300 hover:bg-gray-100 hover:shadow-lg transform hover:scale-105 active:scale-95">
             Start Building Automations <Check className="w-5 h-5" />
           </button>
         </div>
@@ -157,6 +165,12 @@ export default function HowItWorks() {
           }
         }
       `}</style>
+       {/* Auth Modal — blur backdrop + Login/Register switching */}
+      <AuthModal
+        mode={authMode}
+        onClose={() => setAuthMode(null)}
+        onSwitch={(newMode) => setAuthMode(newMode)}
+      />
     </section>
   );
 }

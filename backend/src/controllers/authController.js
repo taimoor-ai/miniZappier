@@ -1,8 +1,12 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 
-// Generate JWT
+// 🔐 Initialize Google Client
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// 🔐 Generate JWT
 const generateToken = (id) => {
   return jwt.sign(
     { id },
@@ -14,17 +18,20 @@ const generateToken = (id) => {
   );
 };
 
-// REGISTER
+//////////////////////////////////////////////////////
+// 🟢 REGISTER (Email/Password)
+//////////////////////////////////////////////////////
 const register = async (req, res) => {
-  try { 
-      if (!req.body) {
+  try {
+    if (!req.body) {
       return res.status(400).json({
         message: "Request body is missing",
       });
     }
+
     const { name, email, password } = req.body;
 
-    // 🔒 Basic validation
+    // 🔒 Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         message: "All fields are required",
@@ -37,10 +44,16 @@ const register = async (req, res) => {
       });
     }
 
-    // Normalize email
     const normalizedEmail = email.toLowerCase().trim();
 
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    let existingUser = await User.findOne({ email: normalizedEmail });
+
+    // 🔥 If user exists via Google only
+    if (existingUser && existingUser.googleId && !existingUser.password) {
+      return res.status(400).json({
+        message: "This account is registered with Google. Please login with Google.",
+      });
+    }
 
     if (existingUser) {
       return res.status(409).json({
@@ -48,7 +61,7 @@ const register = async (req, res) => {
       });
     }
 
-    // 🔒 Stronger hashing
+    // 🔐 Hash password
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -56,6 +69,7 @@ const register = async (req, res) => {
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
+      provider: "local",
     });
 
     const token = generateToken(user._id);
@@ -70,25 +84,26 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-
+    console.error("REGISTER ERROR:", error);
     res.status(500).json({
       message: "Server error",
     });
   }
 };
 
-// LOGIN
+//////////////////////////////////////////////////////
+// 🔵 LOGIN (Email/Password)
+//////////////////////////////////////////////////////
 const login = async (req, res) => {
   try {
-      if (!req.body) {
+    if (!req.body) {
       return res.status(400).json({
         message: "Request body is missing",
       });
     }
+
     const { email, password } = req.body;
 
-    // 🔒 Validation
     if (!email || !password) {
       return res.status(400).json({
         message: "Email and password are required",
@@ -99,10 +114,16 @@ const login = async (req, res) => {
 
     const user = await User.findOne({ email: normalizedEmail });
 
-    // 🔒 Prevent user enumeration
     if (!user) {
       return res.status(401).json({
         message: "Invalid email or password",
+      });
+    }
+
+    // 🔥 If Google-only account
+    if (!user.password) {
+      return res.status(400).json({
+        message: "This account uses Google login. Please login with Google.",
       });
     }
 
@@ -126,15 +147,88 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-
+    console.error("LOGIN ERROR:", error);
     res.status(500).json({
       message: "Server error",
     });
   }
 };
 
+//////////////////////////////////////////////////////
+// 🔴 GOOGLE LOGIN
+//////////////////////////////////////////////////////
+const googleLogin = async (req, res) => {
+  try {
+    console.log("GOOGLE LOGIN CALLED");
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Google token missing",
+      });
+    }
+
+    // 🔐 Verify token with Google
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const { sub, name, email, picture } = payload;
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    let user = await User.findOne({ email: normalizedEmail });
+
+    //////////////////////////////////////////////////////
+    // 🔥 ACCOUNT MERGING LOGIC
+    //////////////////////////////////////////////////////
+    if (!user) {
+      // 🆕 Create new user
+      user = await User.create({
+        name,
+        email: normalizedEmail,
+        googleId: sub,
+        picture,
+        provider: "google",
+      });
+    } else {
+      // 🔗 Link Google if not already linked
+      if (!user.googleId) {
+        user.googleId = sub;
+        user.picture = picture;
+        user.provider = "google";
+        await user.save();
+      }
+    }
+
+    const appToken = generateToken(user._id);
+
+    res.json({
+      message: "Google login successful",
+      token: appToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+      },
+    });
+  } catch (error) {
+    console.error("GOOGLE LOGIN ERROR:", error);
+    res.status(401).json({
+      message: "Google authentication failed",
+    });
+  }
+};
+
+//////////////////////////////////////////////////////
+// 📦 EXPORTS
+//////////////////////////////////////////////////////
 module.exports = {
   register,
   login,
+  googleLogin,
 };

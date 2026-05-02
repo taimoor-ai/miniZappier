@@ -2,7 +2,8 @@ import { ArrowRight } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import LottieAnimation from "./LottieAnimation";
-
+import AuthModal from "./AuthModel";
+import { useState } from "react";
 // ─── Animation Variants ───────────────────────────────────────────────────────
 
 const containerVariants = {
@@ -53,7 +54,7 @@ const stats = [
 function Stats() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
-
+   
   return (
     <div ref={ref} className="grid mt-6 text-black grid-cols-3 gap-6 max-w-md">
       {stats.map((stat, i) => (
@@ -77,7 +78,12 @@ function Stats() {
 export default function Hero() {
   const rightRef = useRef(null);
   const rightInView = useInView(rightRef, { once: true, margin: "-100px" });
-
+ const [authMode, setAuthMode] = useState(null); // 'login' | 'register' | null
+    const [isOpen, setIsOpen] = useState(false);
+const openRegister = () => {
+    setIsOpen(false);
+    setAuthMode("register");
+  };
   return (
     <section className="relative lg:pl-10 w-full bg-white pt-28 md:pt-32 lg:pt-20 pb-16 md:pb-24 lg:pb-32 overflow-hidden">
 
@@ -122,7 +128,8 @@ export default function Hero() {
               variants={fadeSlideUp}
               className="flex flex-col sm:flex-row gap-4 mb-12"
             >
-              <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-2xl hover:shadow-black/40 transition-all duration-300 hover:scale-105">
+              <button onClick={openRegister}
+              className="bg-black text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-2xl hover:shadow-black/40 transition-all duration-300 hover:scale-105">
                 Get Started Free
                 <ArrowRight className="w-5 h-5" />
               </button>
@@ -151,6 +158,12 @@ export default function Hero() {
 
         </div>
       </div>
+       {/* Auth Modal — blur backdrop + Login/Register switching */}
+            <AuthModal
+              mode={authMode}
+              onClose={() => setAuthMode(null)}
+              onSwitch={(newMode) => setAuthMode(newMode)}
+            />
     </section>
   );
 }
